@@ -4,6 +4,7 @@ import math
 from tqdm import tqdm
 import numpy as np
 import pygame
+import sys
 
 def display_spaceship(spaceship_position, display):
     pygame.draw.rect(display, (0, 255, 0), pygame.Rect(spaceship_position[0], spaceship_position[1], 10, 10))
@@ -14,12 +15,16 @@ def display_rocks(rocks_position, display):
         pygame.draw.rect(display, (255, 0, 0), pygame.Rect(rock[0], rock[1], 10, 10))
 
 
+def generate_rock():
+    return [display_width, random.randrange(1, display_height / 10) * 10]
+
+
 def starting_positions():
     spaceship_position = [0, 100]
     
     rocks_position = list()
     for i in range(0,5):
-        rock_position = [random.randrange(1, display_width / 10) * 10, random.randrange(1, display_height / 10) * 10]
+        rock_position = generate_rock()
         rocks_position.append(rock_position)
 
     score = 0
@@ -35,9 +40,10 @@ def rock_distance_from_spaceship(rocks_position, spaceship_position):
     return spaceship_position[0] - rock[0]
 
 
-def generate_rock(spaceship_position, rocks_position, button_direction, score):
-    if spaceship_position == rocks_position:
-        score = 1
+def update_positions(spaceship_position, rocks_position, button_direction, score):
+    for rock in rocks_position:
+        if rock == spaceship_position:
+            score = 1
     
     if button_direction == 1:
         spaceship_position[1] += 10
@@ -45,6 +51,9 @@ def generate_rock(spaceship_position, rocks_position, button_direction, score):
         spaceship_position[1] -= 10
 
     rocks_position = [[x[0] - 10] + [x[1]] for x in rocks_position] 
+
+    if bool(np.random.binomial(1, 0.4, 1)):
+        rocks_position.append(generate_rock())
 
     return spaceship_position, rocks_position, score
 
@@ -72,17 +81,19 @@ def play_game(spaceship_position, rocks_position, button_direction, score, displ
     crashed = False
     while crashed is not True:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or score == 1:
                 crashed = True
+                pygame.quit() 
+                sys.exit()
         display.fill((255, 255, 255))
 
         display_rocks(rocks_position, display)
         display_spaceship(spaceship_position, display)
 
-        spaceship_position, rocks_position, score = generate_rock(spaceship_position, rocks_position, button_direction, score)
+        spaceship_position, rocks_position, score = update_positions(spaceship_position, rocks_position, button_direction, score)
         pygame.display.set_caption("SCORE: " + str(score))
         pygame.display.update()
-        clock.tick(500)
+        clock.tick(10)
 
         return spaceship_position, rocks_position, score
 
@@ -91,7 +102,7 @@ DOWN ->button_direction = 2
 UP -> button_direction = 1
 '''
 
-display_width = 500
+display_width = 400
 display_height = 250
 green = (0,255,0)
 red = (255,0,0)
@@ -104,7 +115,7 @@ clock = pygame.time.Clock()
 
 test_games = 1
  
-steps_per_game = 50
+steps_per_game = 100
 
 for _ in range(test_games):
         spaceship_position, rocks_position, score = starting_positions()
@@ -116,7 +127,6 @@ for _ in range(test_games):
             spaceship_position, is_up_blocked, is_down_blocked = blocked_directions(spaceship_position)
 
             button_direction = 0
-            clock.tick(4)
 
             spaceship_position, rocks_position, score = play_game(spaceship_position, rocks_position, button_direction, score, display, clock)
 
