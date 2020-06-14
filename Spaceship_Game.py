@@ -27,15 +27,30 @@ def starting_positions():
 
     score = 0
 
-    return spaceship_position, rocks_position, score
+    distance_from_rock = rock_distance_from_spaceship(rocks_position, spaceship_position)
+
+    return spaceship_position, rocks_position, distance_from_rock, score
 
 
 def rock_distance_from_spaceship(rocks_position, spaceship_position):
+
+    distance_from_rock = 5
+
     for rock in rocks_position:
         if rock[1] == spaceship_position[1]:
-            rock_in_target = rock
+            distance_from_rock = rock[0] - spaceship_position[0]
     
-    return spaceship_position[0] - rock[0]
+    return distance_from_rock
+
+
+
+def generate_random_direction(distance_from_rock): 
+    if distance_from_rock > 0:
+        direction = random.choice([1,-1])
+    else:
+        direction = 0
+
+    return direction
 
 
 def update_positions(spaceship_position, rocks_position, button_direction, score):
@@ -45,13 +60,15 @@ def update_positions(spaceship_position, rocks_position, button_direction, score
     
     if button_direction == 1:
         spaceship_position[1] += 10
-    elif button_direction == 2:
+    elif button_direction == -1:
         spaceship_position[1] -= 10
 
     rocks_position = [[x[0] - 10] + [x[1]] for x in rocks_position] 
 
     if bool(np.random.binomial(1, 0.4, 1)):
         rocks_position.append(generate_rock())
+
+#    distance_from_rock = rock_distance_from_spaceship(rocks_position, spaceship_position)
 
     return spaceship_position, rocks_position, score
 
@@ -63,19 +80,19 @@ def collision_with_rock(rocks_position, score):
 
 def blocked_directions(spaceship_position):
 
-    is_up_blocked = 0
-    is_down_blocked = 0 
+    is_up_blocked = False
+    is_down_blocked = False 
 
-    if spaceship_position[1] + 10 >= 500:
-        is_up_blocked = 1
+    if spaceship_position[1] + 10 >= display_height:
+        is_up_blocked = True
     
     if spaceship_position[1] - 10 <= 0:
-        is_down_blocked = 1
+        is_down_blocked = True
 
     return spaceship_position, is_up_blocked, is_down_blocked
 
 
-def play_game(spaceship_position, rocks_position, button_direction, score, display, clock):
+def play_game(spaceship_position, rocks_position, score, display, clock):
     crashed = False
     while crashed is not True:
         display.fill((255, 255, 255))
@@ -83,16 +100,19 @@ def play_game(spaceship_position, rocks_position, button_direction, score, displ
         display_rocks(rocks_position, display)
         display_spaceship(spaceship_position, display)
 
+        distance_from_rock = rock_distance_from_spaceship(rocks_position, spaceship_position)
+        button_direction = generate_random_direction(distance_from_rock)
+
         spaceship_position, rocks_position, score = update_positions(spaceship_position, rocks_position, button_direction, score)
         pygame.display.set_caption("SCORE: " + str(score))
         pygame.display.update()
 
-        clock.tick(50)
+        clock.tick(10)
 
-        return spaceship_position, rocks_position, score
+        return spaceship_position, rocks_position, distance_from_rock, score
 
 '''
-DOWN ->button_direction = 2
+DOWN ->button_direction = -1
 UP -> button_direction = 1
 '''
 
@@ -109,17 +129,15 @@ clock = pygame.time.Clock()
 
 test_games = 1
  
-steps_per_game = 200
+steps_per_game = 500
 
 for _ in range(test_games):
-        spaceship_position, rocks_position, score = starting_positions()
+        spaceship_position, rocks_position, distance_from_rock, score = starting_positions()
 
         for _ in range(steps_per_game):
             spaceship_position, is_up_blocked, is_down_blocked = blocked_directions(spaceship_position)
 
-            button_direction = 0
-
-            spaceship_position, rocks_position, score = play_game(spaceship_position, rocks_position, button_direction, score, display, clock)
+            spaceship_position, rocks_position, distance_from_rock, score = play_game(spaceship_position, rocks_position, score, display, clock)
 
             if score == 1:
                 pygame.quit() 
