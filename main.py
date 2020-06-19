@@ -1,4 +1,4 @@
-from Spaceship_Game import *
+from spaceship_game import *
 from training_data import generate_training_data
 
 from keras.models import Sequential

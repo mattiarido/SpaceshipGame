@@ -1,4 +1,4 @@
-# SpaceshipGame_NN__train
+# SpaceshipGame_NN_train
 
 Spaceship has to avoid incoming rocks and cannot crash borders.
 Neural network is implemented to guide the spaceship through space.

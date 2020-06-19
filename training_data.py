@@ -1,10 +1,10 @@
-from Spaceship_Game import *
+from spaceship_game import *
 
 def generate_training_data(display, clock):
     training_data_x = []
     training_data_y = []
-    training_games = 2
-    steps_per_game = 100
+    training_games = 100
+    steps_per_game = 200
 
     for _ in tqdm(range(training_games)):
         spaceship_position, rocks_position, distance_from_rock, score = starting_positions()
