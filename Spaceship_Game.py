@@ -56,7 +56,7 @@ def generate_random_direction(distance_from_rock):
 def update_positions(spaceship_position, rocks_position, button_direction, score):
     for rock in rocks_position:
         if rock == spaceship_position:
-            score = 1
+            score -= 1000
     
     if button_direction == 1:
         spaceship_position[1] += 10
@@ -69,6 +69,7 @@ def update_positions(spaceship_position, rocks_position, button_direction, score
         rocks_position.append(generate_rock())
 
 #    distance_from_rock = rock_distance_from_spaceship(rocks_position, spaceship_position)
+    score += 1
 
     return spaceship_position, rocks_position, score
 
@@ -98,19 +99,24 @@ def play_game(spaceship_position, rocks_position, button_direction, score, displ
     display_rocks(rocks_position, display)
     display_spaceship(spaceship_position, display)
 
+    is_up_blocked, is_down_blocked = blocked_directions(spaceship_position)
+    if button_direction == 1 and is_up_blocked == True:
+        score -= 1000
+    elif button_direction == -1 and is_down_blocked == True:
+        score -= 1000
+
     spaceship_position, rocks_position, score = update_positions(spaceship_position, rocks_position, button_direction, score)
     pygame.display.set_caption("SCORE: " + str(score))
     pygame.display.update()
 
     clock.tick(10)
 
-    return spaceship_position, rocks_position, distance_from_rock, score
+    return spaceship_position, rocks_position, score
 
 '''
 DOWN ->button_direction = -1
 UP -> button_direction = 1
 '''
-
 display_width = 400
 display_height = 250
 green = (0,255,0)
@@ -118,29 +124,26 @@ red = (255,0,0)
 black = (0,0,0)
 white = (255,255,255)
 
-pygame.init()
-display = pygame.display.set_mode((display_width,display_height))
-clock = pygame.time.Clock()
+if __name__ == "__main__":
 
-test_games = 1
- 
-steps_per_game = 500
+    pygame.init()
+    display = pygame.display.set_mode((display_width,display_height))
+    clock = pygame.time.Clock()
 
-for _ in range(test_games):
+    test_games = 1
+
+    steps_per_game = 200
+
+    for _ in range(test_games):
         spaceship_position, rocks_position, distance_from_rock, score = starting_positions()
 
         while _ in range(steps_per_game):
 
             distance_from_rock = rock_distance_from_spaceship(rocks_position, spaceship_position)
             button_direction = generate_random_direction(distance_from_rock)
-            is_up_blocked, is_down_blocked = blocked_directions(spaceship_position)
-            if button_direction == 1 and is_up_blocked == True:
-                break
-            elif button_direction == -1 and is_down_blocked == True:
-                break
 
-            spaceship_position, rocks_position, distance_from_rock, score = play_game(
-                  spaceship_position
+            spaceship_position, rocks_position, score = play_game(
+                    spaceship_position
                 , rocks_position
                 , button_direction
                 , score
@@ -148,11 +151,12 @@ for _ in range(test_games):
                 , clock
             )
 
-            if score == 1:
+            if score < -2000:
                 break
         
         pygame.quit() 
         sys.exit()
 
-    
+
+
 
