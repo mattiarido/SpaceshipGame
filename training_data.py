@@ -44,17 +44,32 @@ def generate_training_data(display, clock):
 def generate_training_data_y(spaceship_position, button_direction, training_data_y, is_up_blocked, is_down_blocked):
     if button_direction == 1:
         if is_up_blocked == True:
-            training_data_y.append([0])
+            training_data_y.append([0, 0, 0])
         else:
-            training_data_y.append([1])
+            training_data_y.append([1, 0, 0])
 
     elif button_direction == -1:
         if is_down_blocked == True:
-            training_data_y.append([0])
+            training_data_y.append([0, 0, 0])
         else:
-            training_data_y.append([-1])
+            training_data_y.append([0, 0, 1])
     
     else:
-        training_data_y.append([0])
+        training_data_y.append([0, 0, 0])
 
     return button_direction, training_data_y
+
+
+if __name__ == '__main__':
+    training_data_x, training_data_y = generate_training_data(display,clock)
+
+    train_data = np.zeros((len(training_data_x), 6), dtype = int)
+    train_data[:,0:3] = np.array(training_data_x)
+    train_data[:,3:] = np.array(training_data_y)
+
+    with open('train_data.csv', 'w', newline = '') as myfile:
+        colnames = ['is_up_blocked', 'is_down_blocked', 'button_direction', 'move_up', 'stay', 'move_down']
+        wr = csv.writer(myfile, quoting = csv.QUOTE_NONE, delimiter = ';')
+        wr.writerow(colnames)
+        for row in train_data:
+            wr.writerow(row)
