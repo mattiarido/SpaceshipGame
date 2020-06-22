@@ -109,7 +109,7 @@ def play_game(spaceship_position, rocks_position, button_direction, score, displ
     pygame.display.set_caption("SCORE: " + str(score))
     pygame.display.update()
 
-    clock.tick(10)
+    clock.tick(5000)
 
     return spaceship_position, rocks_position, score
 
